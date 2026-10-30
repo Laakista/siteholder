@@ -462,10 +462,32 @@
     @media (max-width: 900px) {
       .stage-bg-art {
         top: auto;
-        bottom: 4vh;
-        right: -8vw;
-        height: 52vh;
-        opacity: 0.22;
+        bottom: 2vh;
+        right: -18vw;
+        height: 72vh;
+        opacity: 0.62;
+      }
+
+      .stage-art-img {
+        filter: blur(4.5px);
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stage-bg-art {
+        top: 8vh;
+        bottom: auto;
+        right: -32vw;
+        height: 92vh;
+        width: 92vh;
+        max-width: 150vw;
+        opacity: 0.88;
+      }
+
+      .stage-art-img {
+        filter: blur(1.5px);
+        padding: 0;
       }
     }
 
@@ -1023,6 +1045,7 @@
       font-family: var(--font-body);
       font-weight: 100;
       font-size: 2.5rem;
+      line-height: 1.18;
       letter-spacing: 0.1em;
       color: var(--color-blue);
       margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
@@ -1036,13 +1059,18 @@
     .quote {
       grid-area: 1 / 1;
       opacity: 0;
-      transition: opacity 0.25s ease;
+      transform: translateY(6px);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
       pointer-events: none;
+      visibility: hidden;
     }
 
     .quote.is-active {
       opacity: 1;
+      transform: translateY(0);
       pointer-events: auto;
+      visibility: visible;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .quote-arrows {
@@ -1162,17 +1190,11 @@
     .team-contacts {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: clamp(1.5rem, 3.5vw, 3rem);
+      gap: 0;
       width: 100%;
       margin-top: clamp(5rem, 11vh, 8.5rem);
       padding-top: clamp(2.5rem, 5vh, 4rem);
       border-top: 1px solid var(--color-blue);
-    }
-
-    .team-person {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
     }
 
     .team-person-name {
@@ -1264,17 +1286,66 @@
       opacity: 1;
     }
 
+    .team-person {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 clamp(1rem, 2vw, 2.5rem);
+    }
+
+    .team-person:first-child {
+      padding-left: 0;
+    }
+
+    .team-person:last-child {
+      padding-right: 0;
+    }
+
+    .team-person:not(:first-child) {
+      border-left: 1px solid rgba(222, 163, 69, 0.35);
+    }
+
     @media (max-width: 960px) {
       .team-contacts {
         grid-template-columns: repeat(2, 1fr);
-        gap: 2.5rem;
+        gap: 0;
+      }
+
+      .team-person {
+        padding: 1.5rem;
+      }
+
+      .team-person:nth-child(2n+1) {
+        padding-left: 0;
+      }
+
+      .team-person:nth-child(2n) {
+        border-left: 1px solid rgba(222, 163, 69, 0.35);
+        padding-right: 0;
+      }
+
+      .team-person:nth-child(n+3) {
+        border-top: 1px solid rgba(222, 163, 69, 0.35);
+        padding-top: 2rem;
       }
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 640px) {
       .team-contacts {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 0;
+      }
+
+      .team-person {
+        padding: 0;
+      }
+
+      .team-person:not(:first-child) {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid rgba(222, 163, 69, 0.35);
+        padding-top: 1.75rem;
+        margin-top: 1.75rem;
       }
     }
 
@@ -1306,10 +1377,29 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.65rem;
+        padding-top: 2rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      .brand-logo {
+        height: 3.1rem;
+      }
+
+      .section-nav {
+        top: 2rem;
+        right: 1.5rem;
       }
 
       .stage {
         padding-top: clamp(4.5rem, 11vh, 6.5rem);
+      }
+
+      .stage-inner main,
+      .block,
+      .block-preview {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
       }
 
       h1 {
@@ -1318,9 +1408,10 @@
       }
 
       .hero-subhead {
-        font-size: 0.78rem;
+        font-size: 1.05rem;
+        line-height: 1.45;
         letter-spacing: 0.14em;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.6rem;
       }
 
       .lead {
@@ -1329,8 +1420,49 @@
         font-weight: 300;
       }
 
-      .brand-logo {
-        height: 2.3rem;
+      /* Sovelluskuva: vähintään 150% leveydestä ja panorointi */
+      .block-preview {
+        overflow-x: clip;
+      }
+
+      .preview-frame {
+        width: 155vw;
+        max-width: none;
+        margin: 0 0 clamp(2.5rem, 6vh, 4rem) -1.5rem;
+        transform: translate3d(1.5rem, 0, 0);
+        will-change: transform;
+      }
+
+      .preview-frame img {
+        width: 100%;
+        height: auto;
+      }
+
+      /* Featureissa numerot ja otsikot samalle riville */
+      .feature-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "num title"
+          "desc desc";
+        column-gap: 0.85rem;
+        row-gap: 0.45rem;
+        align-items: baseline;
+      }
+
+      .feature-num {
+        grid-area: num;
+        margin-bottom: 0;
+        line-height: 1.25;
+      }
+
+      .feature-title {
+        grid-area: title;
+        margin-bottom: 0;
+      }
+
+      .feature-desc {
+        grid-area: desc;
       }
 
       .timeline-header {
@@ -1509,6 +1641,7 @@
   </section>
 
   <section class="block block-timeline" id="aikajana" aria-labelledby="aikajana-h">
+    <h2 id="aikajana-h">Koska ollaan perillä?</h2>
 
     <!-- Koko ruudun levyinen, reunoilta pehmeästi häivytetty horisonttiraide -->
     <div class="timeline-rail-wrap" tabindex="0" role="region" aria-label="Aikajanan virstanpylväät">
@@ -1750,20 +1883,43 @@
       goTo(0);
     })();
 
-    // Referenssit: välitön siirtymä ilman viivettä
+    // Referenssit: pehmeä ja sulava siirtymä ilman töksähdystä
     (function () {
       const quotes = [...document.querySelectorAll('.quote')];
+      const section = document.getElementById('tekosia');
       let current = 0;
+      let isTransitioning = false;
 
       function show(next) {
-        if (next === current) return;
+        if (next === current || isTransitioning) return;
+        isTransitioning = true;
         quotes[current].classList.remove('is-active');
         current = next;
         quotes[current].classList.add('is-active');
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 380);
       }
 
-      document.getElementById('quotePrev').addEventListener('click', () => show((current - 1 + quotes.length) % quotes.length));
-      document.getElementById('quoteNext').addEventListener('click', () => show((current + 1) % quotes.length));
+      document.getElementById('quotePrev')?.addEventListener('click', () => show((current - 1 + quotes.length) % quotes.length));
+      document.getElementById('quoteNext')?.addEventListener('click', () => show((current + 1) % quotes.length));
+
+      // Kosketuspyyhkäisy (swipe gesture) sitaateille
+      let touchStartX = 0;
+      let touchStartY = 0;
+      section?.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      section?.addEventListener('touchend', (e) => {
+        const diffX = e.changedTouches[0].screenX - touchStartX;
+        const diffY = e.changedTouches[0].screenY - touchStartY;
+        if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+          if (diffX < 0) show((current + 1) % quotes.length);
+          else if (diffX > 0) show((current - 1 + quotes.length) % quotes.length);
+        }
+      }, { passive: true });
     })();
 
     // Osionavigaatio: nuolet edelliseen ja seuraavaan osioon
@@ -1926,6 +2082,49 @@
 
       section.addEventListener('mousemove', onMouseMove, { passive: true });
       section.addEventListener('mouseleave', onMouseLeave);
+    })();
+
+    // Mobiilissa: sovelluskuvan panorointi oikealta vasemmalle vieritettäessä
+    (function () {
+      const section = document.getElementById('nakyma');
+      const frame = section ? section.querySelector('.preview-frame') : null;
+      if (!section || !frame) return;
+
+      let ticking = false;
+
+      function onScroll() {
+        if (window.innerWidth > 640) return; // Vain mobiilissa, ei koske deskariin
+        const rect = frame.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const startY = vh * 0.85;
+        const endY = -rect.height * 0.25;
+        const currentProgress = (startY - rect.top) / (startY - endY);
+        const progress = Math.max(0, Math.min(1, currentProgress));
+
+        const vw = window.innerWidth;
+        const pad = 24; // 1.5rem
+        const frameW = frame.offsetWidth || (vw * 1.55);
+        const startX = pad;
+        const endX = vw - pad - frameW;
+        const curX = startX + progress * (endX - startX);
+
+        frame.style.transform = `translate3d(${curX.toFixed(1)}px, 0, 0)`;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth <= 640) onScroll();
+        else frame.style.transform = '';
+      });
+
+      if (window.innerWidth <= 640) onScroll();
     })();
   </script>
 </body>

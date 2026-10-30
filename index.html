@@ -2107,12 +2107,11 @@
         const rect = frame.getBoundingClientRect();
         const vh = window.innerHeight;
 
-        // Pidennetty animaatioalue (~240px, n. 4-5 cm peukalon luonteva liike)
-        // Asetetaan animaation päättymispiste riittävän alas (endY >= 165px),
-        // jolloin kuvan yläreuna EI KOSKAAN leikkaudu näytön yläreunasta pois!
-        const travel = 240;
-        const endY = Math.max(165, vh * 0.22);
-        const startY = endY + travel;
+        // Pidennetty animaatioalue (~350px) ja aloitus alempana ruudulla (startY ~ 68% vh)
+        // Näin liike alkaa heti kuvan tullessa näytön alaosaan ja jatkuu sulavasti,
+        // päättyen hyvissä ajoin ennen näytön yläreunaa.
+        const travel = 350;
+        const startY = Math.round(vh * 0.68);
 
         const currentProgress = (startY - rect.top) / travel;
         const progress = Math.max(0, Math.min(1, currentProgress));

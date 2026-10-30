@@ -1161,12 +1161,12 @@
 
     .team-contacts {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: clamp(2rem, 4vw, 4rem);
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(1.5rem, 3.5vw, 3rem);
       width: 100%;
       margin-top: clamp(5rem, 11vh, 8.5rem);
       padding-top: clamp(2.5rem, 5vh, 4rem);
-      border-top: 1px solid var(--color-ink-faint);
+      border-top: 1px solid var(--color-blue);
     }
 
     .team-person {
@@ -1214,10 +1214,67 @@
       text-underline-offset: 3px;
     }
 
-    @media (max-width: 680px) {
+    .team-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .team-brand-logo-link {
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
+      text-decoration: none;
+      margin-bottom: 0.25rem;
+    }
+
+    .team-brand-logo {
+      height: 1.55rem;
+      width: auto;
+      display: block;
+      opacity: 0.75;
+      transition: opacity 0.25s ease, transform 0.2s ease;
+    }
+
+    .team-brand-logo-link:hover .team-brand-logo,
+    .team-brand-logo-link:focus-visible .team-brand-logo {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .team-brand-text {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--color-ink);
+      opacity: 0.6;
+      letter-spacing: 0.02em;
+      font-weight: 300;
+    }
+
+    .team-brand-text a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: opacity 0.2s ease;
+    }
+
+    .team-brand-text a:hover,
+    .team-brand-text a:focus-visible {
+      opacity: 1;
+    }
+
+    @media (max-width: 960px) {
+      .team-contacts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+      }
+    }
+
+    @media (max-width: 560px) {
       .team-contacts {
         grid-template-columns: 1fr;
-        gap: 1.75rem;
+        gap: 2rem;
       }
     }
 
@@ -1565,22 +1622,16 @@
         <p class="team-person-link"><a href="mailto:henrik.lindstrom@tiresis.fi">henrik.lindstrom@tiresis.fi</a></p>
         <p class="team-person-link"><a href="tel:+358403515553">+358 40 3515 553</a></p>
       </div>
-    </div>
-  </section>
-
-  <div class="content-area">
-
-    <footer>
-      <div class="footer-brand">
-        <a href="https://tiresis.fi" target="_blank" rel="noopener noreferrer" class="footer-logo-link" aria-label="Tiresis verkkosivusto">
-          <img src="tiresis-logo-white.svg" alt="Tiresis" class="footer-logo" width="156" height="38" decoding="async">
+      <div class="team-person team-brand">
+        <a href="https://tiresis.fi" target="_blank" rel="noopener noreferrer" class="team-brand-logo-link" aria-label="Tiresis verkkosivusto">
+          <img src="tiresis-logo-white.svg" alt="Tiresis" class="team-brand-logo" width="156" height="38" decoding="async">
         </a>
-        <p class="disclaimer">
-          Tiresis on uuden ajan havainnetoimija. <a href="https://tiresis.fi">tarkemmin →</a>
+        <p class="team-brand-text">
+          Tiresis on uuden ajan havainnetoimija. <a href="https://tiresis.fi" target="_blank" rel="noopener noreferrer">tarkemmin →</a>
         </p>
       </div>
-    </footer>
-  </div>
+    </div>
+  </section>
 
   <script>
     // Aikajana: moderni interaktiivinen horisontti-aikajana

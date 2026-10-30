@@ -2107,11 +2107,10 @@
         const rect = frame.getBoundingClientRect();
         const vh = window.innerHeight;
 
-        // Pidennetty animaatioalue (~350px) ja aloitus alempana ruudulla (startY ~ 68% vh)
-        // Näin liike alkaa heti kuvan tullessa näytön alaosaan ja jatkuu sulavasti,
-        // päättyen hyvissä ajoin ennen näytön yläreunaa.
-        const travel = 350;
-        const startY = Math.round(vh * 0.68);
+        // Animaation aloituspiste tuotu hieman ylemmäs ruudulla (startY ~ 58% vh)
+        // ja liikematka tasapainotettu (travel = 320px) sulavaan peukaloliikkeeseen
+        const travel = 320;
+        const startY = Math.round(vh * 0.58);
 
         const currentProgress = (startY - rect.top) / travel;
         const progress = Math.max(0, Math.min(1, currentProgress));

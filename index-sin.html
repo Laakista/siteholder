@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="fi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteHolder · havainne- ja vuorovaikutustyökalu</title>
+  <meta name="description" content="Näe ja esittele hanke valmiina heti ensimetreiltä asti.">
+
+  <!-- Google Fonts: Aboreto & Raleway -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Raleway:ital,wght@0,300;0,400;1,300&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --color-paper: #050c16;
+      --color-ink: #f7e9e0;
+      --color-ink-faint: #dea345;
+      --font-heading: 'Aboreto', serif;
+      --font-body: 'Raleway', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--color-paper);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- ELÄVÄ ORGAANINEN TAUSTAEFEKTI (SELKEÄSTI KOROSTETTU) --- */
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(65px);
+      opacity: 0.72;
+      will-change: transform;
+      mix-blend-mode: multiply;
+    }
+
+    /* Korostettu lämmin kultainen okra / keltainen */
+    .blob-amber {
+      width: clamp(420px, 55vw, 850px);
+      height: clamp(420px, 55vw, 850px);
+      top: -12%;
+      right: -8%;
+      background: radial-gradient(circle, rgba(131, 91, 16, 0.78) 0%, rgba(64, 44, 13, 0.28) 55%, transparent 75%);
+      animation: drift-amber 11s ease-in-out infinite alternate;
+    }
+
+    /* Korostettu lämmin terrakotta / punertava savi */
+    .blob-terracotta {
+      width: clamp(380px, 50vw, 800px);
+      height: clamp(380px, 50vw, 800px);
+      bottom: -12%;
+      left: -8%;
+      background: radial-gradient(circle, rgba(24, 85, 132, 0.72) 0%, rgba(10, 52, 111, 0.22) 55%, transparent 75%);
+      animation: drift-terracotta 13s ease-in-out infinite alternate;
+    }
+
+    /* Kolmas lämmin sävy: hehkuva persikka / aprikoosi keskellä */
+    .blob-warm {
+      width: clamp(360px, 45vw, 700px);
+      height: clamp(360px, 45vw, 700px);
+      top: 30%;
+      left: 25%;
+      background: radial-gradient(circle, rgba(84, 47, 33, 0.65) 0%, rgba(91, 54, 38, 0.18) 55%, transparent 75%);
+      animation: drift-warm 10s ease-in-out infinite alternate;
+    }
+
+    /* Aito paperin kuitu ja mikrorakeisuus */
+    .paper-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Liikeradat ovat nyt huomattavasti laajemmat ja nopeammat (n. 10–13 sekuntia) */
+    @keyframes drift-amber {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(-26%, 22%) scale(1.18);
+      }
+
+      100% {
+        transform: translate(-38%, 10%) scale(0.88);
+      }
+    }
+
+    @keyframes drift-terracotta {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(26%, -24%) scale(1.2);
+      }
+
+      100% {
+        transform: translate(14%, -36%) scale(0.86);
+      }
+    }
+
+    @keyframes drift-warm {
+      0% {
+        transform: translate(0, 0) scale(0.9);
+      }
+
+      50% {
+        transform: translate(-20%, -18%) scale(1.25);
+      }
+
+      100% {
+        transform: translate(22%, 16%) scale(0.95);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob {
+        animation: none;
+      }
+    }
+
+    /* --- OSIONAVIGAATIO: kaksi nuolta, aina oikeassa yläkulmassa --- */
+    .section-nav {
+      position: fixed;
+      top: clamp(1rem, 2.2vw, 2.4rem);
+      right: clamp(1rem, 2.2vw, 2.4rem);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .nav-arrow {
+      appearance: none;
+      background: none;
+      border: none;
+      width: 2.75rem;
+      height: 2.75rem;
+      max-height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: var(--font-body);
+      font-size: 1.9rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--color-ink);
+      opacity: 0.6;
+      cursor: pointer;
+      transition: opacity 0.35s ease, max-height 0.4s ease;
+    }
+
+    .nav-arrow:hover,
+    .nav-arrow:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    /* piilotettu nuoli feidautuu pois ja kutistuu, jolloin toinen nuoli liukuu paikalleen */
+    .nav-arrow.is-hidden {
+      opacity: 0;
+      max-height: 0;
+      pointer-events: none;
+    }
+
+    /* --- YLÄPALKKI --- */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1.5rem;
+      padding-top: clamp(1rem, 2.2vw, 2.4rem);
+      padding-bottom: 0;
+      padding-left: clamp(1rem, 2.2vw, 2.4rem);
+      padding-right: clamp(1rem, 2.2vw, 2.4rem);
+    }
+
+    .brand {
+      font-family: var(--font-heading);
+      font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-ink-faint);
+      text-decoration: none;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.75rem 2rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+
+    .contact a {
+      color: var(--color-ink);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+      opacity: 0.88;
+      white-space: nowrap;
+    }
+
+    .contact a:hover {
+      opacity: 1;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1px;
+    }
+
+    /* --- SISÄLTÖALUE --- */
+    .content-area {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+
+    main {
+      padding: clamp(3.5rem, 12vh, 8rem) 0;
+      max-width: 820px;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 2.8rem;
+      line-height: 1.18;
+      letter-spacing: 0.06em;
+      font-weight: 400;
+      color: var(--color-ink);
+      margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem);
+      text-wrap: balance;
+    }
+
+    .lead {
+      font-size: 1.2em;
+      line-height: 1.75;
+      font-weight: 300;
+      color: var(--color-ink);
+      letter-spacing: 0.025em;
+      max-width: 900px;
+    }
+
+    /* --- VAAKA-AIKAJANA (vieritys ohjaa liikettä) --- */
+    /* Sivu vierittyy normaalisti; ylin näkymä on täyden ruudun korkuinen
+       ja aikajana kaappaa vierityksen vain sen ollessa päällä */
+    .stage {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      height: 100svh;
+      flex-shrink: 0;
+      display: flex;
+    }
+
+    .stage-inner {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: clamp(4rem, 14vh, 10rem);
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    .stage-inner main {
+      padding: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+    }
+
+    .stage-inner main .lead {
+      max-width: 720px;
+    }
+
+    .timeline {
+      position: relative;
+      width: 100%;
+      height: 6rem;
+      margin-top: clamp(1.5rem, 5vh, 3.5rem);
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 0;
+      top: calc(0.325rem - 1px);
+      width: 100vw;
+      height: 2px;
+      background: var(--color-ink-faint);
+      opacity: 0.35;
+      will-change: transform;
+    }
+
+    .timeline-track {
+      position: absolute;
+      inset: 0;
+      list-style: none;
+    }
+
+    .tl-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      will-change: transform;
+    }
+
+    .tl-dot {
+      display: block;
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      background: var(--color-ink-faint);
+    }
+
+    .tl-label {
+      position: absolute;
+      top: 2.5rem;
+      left: 0;
+      white-space: nowrap;
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.025em;
+      opacity: 0;
+      will-change: opacity;
+      display: flex;
+      align-items: flex-start;
+      color: var(--color-ink-faint);
+    }
+
+    .tl-text {
+      display: block;
+    }
+
+    .tl-title {
+      display: block;
+    }
+
+    .tl-desc {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.5;
+      letter-spacing: 0.03em;
+      color: var(--color-ink);
+    }
+
+    .timeline-arrows {
+      width: 100%;
+      max-width: 1200px;
+      margin: clamp(1.5rem, 4vh, 2.5rem) auto 0;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .tl-arrow {
+      appearance: none;
+      background: none;
+      border: none;
+      width: 3.25rem;
+      height: 3.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -0.75rem;
+      /* nuolen reuna linjaan tekstin kanssa */
+      font-family: var(--font-body);
+      font-size: 2.6rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--color-ink-faint);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+      touch-action: manipulation;
+    }
+
+    .tl-arrow+.tl-arrow {
+      margin-left: 0;
+    }
+
+    .tl-arrow:hover,
+    .tl-arrow:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    .tl-arrow.is-disabled {
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tl-label {
+        transition: none;
+      }
+    }
+
+    footer {
+      padding: 2.5rem 0 clamp(1.5rem, 3vh, 2.5rem);
+      max-width: 720px;
+    }
+
+    /* --- ALAOSIOT --- */
+    .block {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(4rem, 12vh, 8rem) clamp(1.5rem, 6vw, 6rem);
+    }
+
+    .block h2 {
+      font-family: var(--font-heading);
+      font-weight: 400;
+      font-size: 2rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-ink-faint);
+      margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+    }
+
+    .quotes {
+      display: grid;
+      max-width: 900px;
+    }
+
+    .quote {
+      grid-area: 1 / 1;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .quote.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .quote-arrows {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: clamp(1.5rem, 3vh, 2.5rem);
+    }
+
+    .quote blockquote {
+      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+      line-height: 1.5;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      color: var(--color-ink);
+    }
+
+    .quote figcaption {
+      margin-top: 1.2rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.06em;
+      color: var(--color-ink-faint);
+    }
+
+    .contact-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 2rem;
+      margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+
+    .contact-info a,
+    .contact-info span {
+      color: var(--color-ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .contact-info a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1px;
+    }
+
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      max-width: 720px;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      background: rgba(163, 110, 25, 0.1);
+      border: 0px solid var(--color-ink-faint);
+      border-radius: 0;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      font-size: 1rem;
+      color: var(--color-ink);
+      transition: border-color 0.2s ease;
+    }
+
+    .contact-form textarea {
+      grid-column: 1 / -1;
+      resize: vertical;
+    }
+
+    .contact-form ::placeholder {
+      color: var(--color-ink);
+      opacity: 0.5;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--color-ink);
+    }
+
+    .form-submit {
+      grid-column: 1 / -1;
+      justify-self: start;
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--color-ink-faint);
+      margin-top: 2rem;
+      padding: 0.8rem 1.8rem;
+      font: inherit;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: var(--color-ink);
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-submit:hover,
+    .form-submit:focus-visible {
+      outline: none;
+      border-color: var(--color-ink);
+      background: rgba(247, 233, 224, 0.07);
+    }
+
+    @media (max-width: 640px) {
+      .contact-form {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .quote {
+        transition-duration: 0.5s;
+      }
+    }
+
+    .disclaimer {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--color-ink);
+      letter-spacing: 0.03em;
+      font-weight: 300;
+      opacity: .5;
+    }
+
+    /* Mobiilinäkymä */
+    @media (max-width: 640px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+      }
+
+      .stage {
+        padding-top: clamp(4.5rem, 11vh, 6.5rem);
+      }
+
+      h1 {
+        font-size: 2.4rem;
+      }
+
+      .lead {
+        font-size: 1.1em;
+        line-height: 1.25;
+        font-weight: 300;
+      }
+
+      .brand {
+        font-size: 2rem;
+      }
+
+      /* kuvaukset rivittyvät tekstikappaleen leveyteen eivätkä jää näkymättömiin */
+      .tl-label {
+        white-space: normal;
+        width: calc(100vw - 2 * clamp(1.5rem, 6vw, 6rem));
+      }
+
+      .timeline {
+        height: 13rem;
+      }
+
+      .contact {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      /* Yhteystiedot aina allekkain riippumatta sisällön pituudesta */
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+
+      .contact-info span,
+      .contact-info a {
+        display: block;
+        width: 100%;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Elävä orgaaninen tausta (korostettu) -->
+  <div class="ambient-canvas">
+    <div class="blob blob-amber"></div>
+    <div class="blob blob-terracotta"></div>
+    <div class="blob blob-warm"></div>
+  </div>
+  <div class="paper-grain"></div>
+
+  <header>
+    <div class="brand">SiteHolder</div>
+    <nav class="section-nav" aria-label="Sivun osiot">
+      <button type="button" class="nav-arrow" id="navUp" aria-label="Edellinen osio">↑</button>
+      <button type="button" class="nav-arrow" id="navDown" aria-label="Seuraava osio">↓</button>
+    </nav>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="stage-inner">
+      <main>
+        <h1>Virtuaalisesti paikan päällä</h1>
+        <p class="lead" id="lead">
+          SiteHolder näyttää hankerakentamisen todelliset maisemavaikutukset mistä tahansa katselupisteestä, suoraan
+          selaimessa. Se tuo kaikki osapuolet samojen näkymien ja yhteisen pöydän ääreen. </p>
+      </main>
+      <div class="timeline" aria-label="Palvelun vaiheet">
+        <div class="timeline-line"></div>
+        <ol class="timeline-track" id="track">
+          <li class="tl-item"><span class="tl-dot"></span><span class="tl-label"><span class="tl-text"><span
+                  class="tl-title">2024</span><span class="tl-desc">Tiresis Oy perustetaan ja se alkaa tuottaa
+                  korkeatasoista havainnemateriaalia hanketoimijoille.</span></span></span>
+          </li>
+          <li class="tl-item"><span class="tl-dot"></span><span class="tl-label"><span class="tl-text"><span
+                  class="tl-title">2025</span><span class="tl-desc">Tiresis uudistaa havainnetuotannon prosesseja ja
+                  nousee nopeasti toimikentän kärkipaikoille.</span></span></span>
+          </li>
+          <li class="tl-item"><span class="tl-dot"></span><span class="tl-label"><span class="tl-text"><span
+                  class="tl-title">2026</span><span class="tl-desc">Intohimoinen kehittäminen ja toimintakentän syvä
+                  ymmärrys johtavat uuden ajan havainneratkaisuun.</span></span></span></li>
+          <li class="tl-item"><span class="tl-dot"></span><span class="tl-label"><span class="tl-text"><span
+                  class="tl-title">2027</span><span class="tl-desc">SiteHolder julkaistaan
+                  hanketoimijoiden käyttöön ja miljoonia maksavat viivästykset alkavat jäädä
+                  historiaan.</span></span></span>
+          <li class="tl-item"><span class="tl-dot"></span><span class="tl-label"><span class="tl-text"><span
+                  class="tl-title">Tule mukaan!</span><span class="tl-desc">Täytä lomake jos haluat olla mukana
+                  uudistamassa
+                  tulevaisuuden kannalta kriittistä
+                  toimialaa.</span></span></span></li>
+          </li>
+        </ol>
+      </div>
+      <div class="timeline-arrows">
+        <button type="button" class="tl-arrow is-disabled" id="tlPrev" aria-label="Edellinen kohta">←</button>
+        <button type="button" class="tl-arrow" id="tlNext" aria-label="Seuraava kohta">→</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="tekosia" aria-labelledby="tekosia-h">
+    <h2 id="tekosia-h">Näytä, vakuuta & vaikuta</h2>
+    <div class="quotes">
+      <figure class="quote is-active">
+        <blockquote>Määritä hankealue ja ripottele voimalat kartalle tai tuo oma .shp-aineisto. Tarkastele
+          kolmiulotteisia tuulivoimaloita mistä tahansa katunäkymästä tai 360-kuvapisteestä.
+        </blockquote>
+        <figcaption>Tuo kaikki osalliset samalle kartalle</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Pyörittele vaihtoehtoisia sijoittelumalleja sisäisesti, esittele rakentamisen maisemavaikutuksia
+          asukasillassa tai anna ihmisten tarkastella näkymiä vapaasti tietyn määräajan.
+        </blockquote>
+        <figcaption>Älä vangitse näkymiä raskaisiin ohjelmiin</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Tarjoa läpinäkyvyyttä ja parempia vuorovaikuttamisen tapoja vaivattomasti. Kerää karttapohjaista
+          palautetta tai järjestä äänestys sijoitteluvaihtoehtojen välillä.</blockquote>
+        <figcaption>Älä piiloudu viestinnän ja lomakkeiden taakse</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>SiteHolder näyttää myös tuulivoimaloiden liikkeen ja valot. Miten ne asettuvat kunkin tarkastelijan
+          kannalta tärkeään maisemaan niin päivällä kuin yölläkin.</blockquote>
+        <figcaption>Poista epävarmuutta ja avoimia kysymyksiä</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Säästä parhaimmillaan jopa vuosien odottelua, kun kalliit havainnemateriaalit eivät riitäkään
+          tai kun vuorovaikutus maanomistajien tai asukkaiden kanssa tulehtuu.</blockquote>
+        <figcaption>Suuntaa aika ja resurssit viisaasti</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Ala keräämään laadukasta ja vertailukelpoista dataa kaikista hankkeistasi. Näe selkästi
+          alueelliset erot, toimivat käytännöt ja huomaa kun tie alkaa nousta pystyyn.</blockquote>
+        <figcaption>Anna syvenevän tiedon ohjata toimintaa</figcaption>
+      </figure>
+    </div>
+    <div class="quote-arrows">
+      <button type="button" class="tl-arrow" id="quotePrev" aria-label="Edellinen sitaatti">←</button>
+      <button type="button" class="tl-arrow" id="quoteNext" aria-label="Seuraava sitaatti">→</button>
+    </div>
+  </section>
+
+  <section class="block" id="kontakti" aria-labelledby="kontakti-h">
+    <h2 id="kontakti-h">Liity listalle</h2>
+    <p class="contact-info">
+      <span>Kerromme julkaisusta ja kehityksen etenemisestä. Ei roskapostia, vain
+        olennainen.</span>
+    </p>
+    <form class="contact-form" id="contact-form">
+      <input type="text" name="Nimi" placeholder="Nimi" autocomplete="name" aria-label="Nimi" required>
+      <input type="text" name="Yritys" placeholder="Yritys" autocomplete="organization" aria-label="Yritys">
+      <input type="email" name="Sähköposti" placeholder="Sähköposti" autocomplete="email" aria-label="Sähköposti"
+        required>
+      <input type="tel" name="Puhelin" placeholder="Puhelin" autocomplete="tel" aria-label="Puhelin">
+      <textarea name="Rooli" placeholder="Kerro roolistasi tai jos olet kiinnostunut sijoittamaan" rows="3"
+        aria-label="Rooli" required></textarea>
+      <button type="submit" class="form-submit">Lähetä →</button>
+    </form>
+  </section>
+
+  <div class="content-area">
+
+    <footer>
+      <p class="disclaimer">
+        Tiresis on uuden ajan sovelluskehitystalo.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Aikajana: itsenäinen sivusuuntainen navigaatio nuolilla, täysin irti sivun vierityksestä
+    (function () {
+      const lead = document.getElementById('lead');
+      const line = document.querySelector('.timeline-line');
+      const items = [...document.querySelectorAll('#track .tl-item')];
+      const labels = items.map(i => i.querySelector('.tl-label'));
+      const n = items.length;
+      let gap, fade, left, right, target = 0, pos = 0, raf = null;
+      const MIN_OPACITY = 0.15; // fokuksen ulkopuolisten osioiden näkyvyys
+
+      function measure() {
+        const r = lead.getBoundingClientRect();
+        left = r.left;
+        right = r.right;
+        fade = r.width * 0.2;
+        gap = r.width * 1.3; // yksi teksti kerrallaan näkyvissä
+        line.style.width = ((n - 1) * gap + window.innerWidth) + 'px';
+        render();
+      }
+
+      function render() {
+        line.style.transform = 'translateX(' + (left - pos * gap).toFixed(1) + 'px)';
+        items.forEach((el, i) => {
+          const x = left + (i - pos) * gap;
+          el.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
+          const maxX = Math.max(left, right - labels[i].offsetWidth);
+          let o = 1;
+          if (x > maxX) o = 1 - (x - maxX) / fade;
+          else if (x < left) o = 1 - (left - x) / fade;
+          const op = Math.min(1, Math.max(MIN_OPACITY, o));
+          labels[i].style.opacity = op.toFixed(3);
+        });
+      }
+
+      function tick() {
+        pos += (target - pos) * 0.15;
+        if (Math.abs(target - pos) < 0.0005) { pos = target; raf = null; } else { raf = requestAnimationFrame(tick); }
+        render();
+      }
+
+      // Nuolinavigaatio aikajanalle
+      const prevBtn = document.getElementById('tlPrev');
+      const nextBtn = document.getElementById('tlNext');
+      function stepTo(i) {
+        target = i;
+        if (!raf) raf = requestAnimationFrame(tick);
+        updateArrows();
+      }
+      function updateArrows() {
+        prevBtn.classList.toggle('is-disabled', target <= 0);
+      }
+      prevBtn.addEventListener('click', () => {
+        if (target > 0) stepTo(target - 1);
+      });
+      nextBtn.addEventListener('click', () => {
+        // viimeisellä kohdalla siirrytään seuraavaan osioon
+        if (target >= n - 1) document.getElementById('tekosia').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else stepTo(target + 1);
+      });
+
+      window.addEventListener('resize', measure);
+      document.fonts && document.fonts.ready.then(measure);
+      measure();
+    })();
+
+    // Referenssit: välitön siirtymä ilman viivettä
+    (function () {
+      const quotes = [...document.querySelectorAll('.quote')];
+      let current = 0;
+
+      function show(next) {
+        if (next === current) return;
+        quotes[current].classList.remove('is-active');
+        current = next;
+        quotes[current].classList.add('is-active');
+      }
+
+      document.getElementById('quotePrev').addEventListener('click', () => show((current - 1 + quotes.length) % quotes.length));
+      document.getElementById('quoteNext').addEventListener('click', () => show((current + 1) % quotes.length));
+    })();
+
+    // Osionavigaatio: nuolet edelliseen ja seuraavaan osioon
+    (function () {
+      const sections = ['stage', 'tekosia', 'kontakti'].map(id => document.getElementById(id));
+      const up = document.getElementById('navUp');
+      const down = document.getElementById('navDown');
+
+      function current() {
+        let idx = 0;
+        sections.forEach((s, i) => { if (s.getBoundingClientRect().top <= window.innerHeight * 0.4) idx = i; });
+        // sivun aivan alalaidassa viimeinen osio on aina nykyinen
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) idx = sections.length - 1;
+        return idx;
+      }
+
+      function goTo(i) {
+        if (i <= 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+        else sections[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function update() {
+        const i = current();
+        up.classList.toggle('is-hidden', i === 0);
+        down.classList.toggle('is-hidden', i === sections.length - 1);
+        up.tabIndex = i === 0 ? -1 : 0;
+        down.tabIndex = i === sections.length - 1 ? -1 : 0;
+      }
+
+      up.addEventListener('click', () => goTo(Math.max(0, current() - 1)));
+      down.addEventListener('click', () => goTo(Math.min(sections.length - 1, current() + 1)));
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+
+    // Yhteydenottolomake: avaa käyttäjän sähköpostiohjelman valmiiksi täytetyllä viestillä
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const body = ['Nimi', 'Yritys', 'Sähköposti', 'Puhelin'].map(k => k + ': ' + (f.get(k) || '')).join('\n')
+        + '\n\n' + f.get('Asia');
+      location.href = 'mailto:imago@laaki.fi?subject=' + encodeURIComponent('Yhteydenotto Laakin sivuilta')
+        + '&body=' + encodeURIComponent(body);
+    });
+  </script>
+</body>
+
+</html>

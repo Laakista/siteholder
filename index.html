@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="fi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laaki — Kerralla kunnolla</title>
+  <meta name="description"
+    content="Sitä saa mitä tilaa. Laakista saat apua kun olet hankkimassa sovellusta tai verkkototeutusta.">
+
+  <!-- Google Fonts: Aboreto & Raleway -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Raleway:ital,wght@0,300;0,400;1,300&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --color-paper: #050c16;
+      --color-ink: #f7e9e0;
+      --color-blue: #799ebd;
+      --color-ink-faint: #dea345;
+      --font-heading: 'Aboreto', serif;
+      --font-body: 'Raleway', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--color-paper);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- ELÄVÄ ORGAANINEN TAUSTAEFEKTI (SELKEÄSTI KOROSTETTU) --- */
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(65px);
+      opacity: 0.72;
+      will-change: transform;
+      mix-blend-mode: multiply;
+    }
+
+    /* Korostettu lämmin kultainen okra / keltainen */
+    .blob-amber {
+      width: clamp(420px, 55vw, 850px);
+      height: clamp(420px, 55vw, 850px);
+      top: -12%;
+      right: -8%;
+      background: radial-gradient(circle, rgba(131, 91, 16, 0.78) 0%, rgba(64, 44, 13, 0.28) 55%, transparent 75%);
+      animation: drift-amber 11s ease-in-out infinite alternate;
+    }
+
+    /* Korostettu lämmin terrakotta / punertava savi */
+    .blob-terracotta {
+      width: clamp(380px, 50vw, 800px);
+      height: clamp(380px, 50vw, 800px);
+      bottom: -12%;
+      left: -8%;
+      background: radial-gradient(circle, rgba(24, 85, 132, 0.72) 0%, rgba(10, 52, 111, 0.22) 55%, transparent 75%);
+      animation: drift-terracotta 13s ease-in-out infinite alternate;
+    }
+
+    /* Kolmas lämmin sävy: hehkuva persikka / aprikoosi keskellä */
+    .blob-warm {
+      width: clamp(360px, 45vw, 700px);
+      height: clamp(360px, 45vw, 700px);
+      top: 30%;
+      left: 25%;
+      background: radial-gradient(circle, rgba(84, 47, 33, 0.65) 0%, rgba(91, 54, 38, 0.18) 55%, transparent 75%);
+      animation: drift-warm 10s ease-in-out infinite alternate;
+    }
+
+    /* Aito paperin kuitu ja mikrorakeisuus */
+    .paper-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Liikeradat ovat nyt huomattavasti laajemmat ja nopeammat (n. 10–13 sekuntia) */
+    @keyframes drift-amber {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(-26%, 22%) scale(1.18);
+      }
+
+      100% {
+        transform: translate(-38%, 10%) scale(0.88);
+      }
+    }
+
+    @keyframes drift-terracotta {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(26%, -24%) scale(1.2);
+      }
+
+      100% {
+        transform: translate(14%, -36%) scale(0.86);
+      }
+    }
+
+    @keyframes drift-warm {
+      0% {
+        transform: translate(0, 0) scale(0.9);
+      }
+
+      50% {
+        transform: translate(-20%, -18%) scale(1.25);
+      }
+
+      100% {
+        transform: translate(22%, 16%) scale(0.95);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob {
+        animation: none;
+      }
+    }
+
+    /* --- OSIONAVIGAATIO: kaksi nuolta, aina oikeassa yläkulmassa --- */
+    .section-nav {
+      position: fixed;
+      top: clamp(1rem, 2.2vw, 2.4rem);
+      right: clamp(1rem, 2.2vw, 2.4rem);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .nav-arrow {
+      appearance: none;
+      background: none;
+      border: none;
+      width: 2.75rem;
+      height: 2.75rem;
+      max-height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: var(--font-body);
+      font-size: 1.9rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--color-ink);
+      opacity: 0.6;
+      cursor: pointer;
+      transition: opacity 0.35s ease, max-height 0.4s ease;
+    }
+
+    .nav-arrow:hover,
+    .nav-arrow:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    /* piilotettu nuoli feidautuu pois ja kutistuu, jolloin toinen nuoli liukuu paikalleen */
+    .nav-arrow.is-hidden {
+      opacity: 0;
+      max-height: 0;
+      pointer-events: none;
+    }
+
+    /* --- YLÄPALKKI --- */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      padding-top: clamp(1rem, 2.2vw, 2.4rem);
+      padding-bottom: 0;
+      padding-left: clamp(1rem, 2.2vw, 2.4rem);
+      padding-right: clamp(1rem, 2.2vw, 2.4rem);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      line-height: 0;
+    }
+
+    .brand-logo {
+      height: clamp(2.2rem, 3.8vw, 3rem);
+      width: auto;
+      display: block;
+      opacity: 0.95;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .brand:hover .brand-logo,
+    .brand:focus-visible .brand-logo {
+      opacity: 1;
+    }
+
+    .brand:focus-visible {
+      outline: 1px solid var(--color-ink-faint);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.75rem 2rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+
+    .contact a {
+      color: var(--color-ink);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+      opacity: 0.88;
+      white-space: nowrap;
+    }
+
+    .contact a:hover {
+      opacity: 1;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1px;
+    }
+
+    /* --- SISÄLTÖALUE --- */
+    .content-area {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+
+    main {
+      padding: clamp(3.5rem, 12vh, 8rem) 0;
+      max-width: 820px;
+    }
+
+    h1 {
+      font-family: var(--font-body);
+      font-size: 3.5rem;
+      line-height: 1.18;
+      letter-spacing: 0.06em;
+      font-weight: 100;
+      color: var(--color-blue);
+      margin-bottom: 0.85rem;
+      text-wrap: balance;
+    }
+
+    .hero-subhead {
+      font-family: var(--font-body);
+      font-size: clamp(0.78rem, 1.2vw, 0.95rem);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--color-ink-faint);
+      margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem);
+      text-wrap: balance;
+    }
+
+    .lead {
+      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+      line-height: 1.5;
+      font-weight: 300;
+      color: var(--color-ink);
+      letter-spacing: 0.02em;
+      max-width: 900px;
+    }
+
+    /* --- HERO-OSIO --- */
+    .stage {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      min-height: 100svh;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      overflow: visible;
+    }
+
+    .stage-bg-art {
+      position: absolute;
+      top: 5vh;
+      bottom: 5vh;
+      right: 5vh;
+      height: 90vh;
+      aspect-ratio: 1 / 1;
+      pointer-events: none;
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform, opacity;
+      transform-origin: center center;
+      overflow: visible;
+    }
+
+    .stage-art-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: blur(10px);
+      padding: 40px;
+      box-sizing: border-box;
+      transform-origin: center center;
+    }
+
+    /* Parallaksi & voimakas vastapäivään kierto: puhekupla nousee, pinni laskeutuu */
+    @keyframes hero-art-motion {
+      0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+      }
+
+      40% {
+        opacity: 0.85;
+      }
+
+      80% {
+        opacity: 0;
+        transform: translate3d(0, 150px, 0) rotate(-75deg);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate3d(0, 180px, 0) rotate(-90deg);
+      }
+    }
+
+    @supports ((animation-timeline: view()) and (animation-range: entry)) {
+      .stage {
+        view-timeline: --stage-view;
+      }
+
+      .stage-bg-art {
+        animation: hero-art-motion linear both;
+        animation-timeline: --stage-view;
+        animation-range: exit 0% exit 90%;
+      }
+    }
+
+    .stage-inner {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: clamp(6rem, 14vh, 10rem);
+      padding-bottom: clamp(3rem, 8vh, 6rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    .stage-inner main {
+      padding: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+    }
+
+    .stage-inner main .lead {
+      max-width: 860px;
+    }
+
+    .hero-cta-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: clamp(1.8rem, 3.5vh, 2.75rem);
+      font-family: var(--font-body);
+      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+      font-weight: 300;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: var(--color-blue);
+      opacity: .5;
+      text-decoration: none;
+      transition: color 0.25s ease, transform 0.25s ease;
+      cursor: pointer;
+    }
+
+    .hero-cta-link:hover,
+    .hero-cta-link:focus-visible {
+      color: var(--color-ink);
+    }
+
+    .hero-cta-arrow {
+      font-family: var(--font-body);
+      font-size: 1.1em;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-cta-link:hover .hero-cta-arrow {
+      transform: translateX(8px);
+    }
+
+    @media (max-width: 900px) {
+      .stage-bg-art {
+        top: auto;
+        bottom: 4vh;
+        right: -8vw;
+        height: 52vh;
+        opacity: 0.22;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .stage-bg-art,
+      .stage-art-img {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+
+    /* --- AIKAJANA: HYPPÄÄ KYYTIIN (MAAILMANLUOKAN HORISONTTI-AIKAJANA) --- */
+    .block-timeline {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(4rem, 12vh, 8rem) clamp(1.5rem, 6vw, 6rem);
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1.5rem;
+      margin-bottom: clamp(2.5rem, 6vh, 4rem);
+    }
+
+    .timeline-header h2 {
+      font-family: var(--font-body);
+      font-weight: 100;
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      color: var(--color-ink-faint);
+      margin-bottom: 0;
+    }
+
+    .timeline-controls {
+      margin-top: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .timeline-counter {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      color: var(--color-ink-faint);
+      opacity: 0.75;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-nav-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .timeline-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+      }
+
+      .timeline-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    /* Koko ruudun levyinen horisonttiviiva pehmeällä reunafeidillä */
+    .timeline-rail-wrap {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      position: relative;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      mask-image: linear-gradient(90deg, transparent 0%, black 12vw, black 88vw, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 12vw, black 88vw, transparent 100%);
+      padding: 1.5rem 0 2rem;
+    }
+
+    .timeline-rail-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .timeline-rail-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 6vw, 6rem);
+      position: relative;
+      min-width: 620px;
+    }
+
+    /* Viiva ulottuu koko viewportin halki ja feidaa reunoilla pehmeästi */
+    .timeline-line-base {
+      position: absolute;
+      bottom: calc(0.925rem - 0.5px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max(100vw, 100% + 40vw);
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(222, 163, 69, 0.22) 14vw, rgba(222, 163, 69, 0.22) calc(100% - 14vw), transparent 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .timeline-line-progress {
+      position: absolute;
+      bottom: calc(0.925rem - 0.5px);
+      left: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--color-ink-faint), var(--color-blue));
+      box-shadow: 0 0 10px rgba(222, 163, 69, 0.5), 0 0 18px rgba(96, 146, 188, 0.4);
+      z-index: 2;
+      width: 0%;
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1), left 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .timeline-nodes {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 3;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .tl-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem 0.75rem;
+      position: relative;
+      color: inherit;
+      font: inherit;
+      transition: transform 0.25s ease;
+      touch-action: manipulation;
+    }
+
+    .tl-node:hover .tl-node-tag {
+      opacity: 1;
+      color: var(--color-ink);
+    }
+
+    .tl-node-tag {
+      font-family: var(--font-heading);
+      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+      letter-spacing: 0.08em;
+      color: var(--color-ink-faint);
+      opacity: 1;
+      margin-bottom: 0.9rem;
+      transition: opacity 0.25s ease, color 0.25s ease, transform 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .tl-node-dot {
+      width: 0.85rem;
+      height: 0.85rem;
+      border-radius: 50%;
+      background: var(--color-ink-faint);
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Valmiiksi kuljetut pisteet */
+    .tl-node.is-passed .tl-node-tag {
+      opacity: 0.5;
+      color: var(--color-ink-faint);
+    }
+
+    .tl-node.is-passed .tl-node-dot {
+      background: var(--color-ink-faint);
+    }
+
+    /* Aktiivinen node */
+    .tl-node.is-active .tl-node-tag {
+      opacity: 1;
+      color: var(--color-blue);
+      transform: scale(1.08);
+      font-weight: 500;
+    }
+
+    .tl-node.is-active .tl-node-dot {
+      background: var(--color-blue);
+      transform: scale(1.15);
+    }
+
+    /* Viimeinen kohta sinisenä */
+    .tl-node--blue .tl-node-tag {
+      color: var(--color-blue);
+      opacity: 0.65;
+    }
+
+    .tl-node--blue .tl-node-dot {
+      border-color: var(--color-blue);
+    }
+
+    .tl-node--blue:hover .tl-node-tag {
+      color: var(--color-blue);
+      opacity: 1;
+    }
+
+    .tl-node--blue.is-passed .tl-node-tag {
+      color: var(--color-blue);
+      opacity: 0.85;
+    }
+
+    .tl-node--blue.is-passed .tl-node-dot {
+      background: var(--color-blue);
+      border-color: var(--color-blue);
+      box-shadow: 0 0 10px rgba(96, 146, 188, 0.45);
+    }
+
+    .tl-node--blue.is-active .tl-node-tag {
+      color: var(--color-blue);
+      opacity: 1;
+      text-shadow: 0 0 16px rgba(96, 146, 188, 0.45);
+    }
+
+    .tl-node--blue.is-active .tl-node-dot {
+      background: var(--color-blue);
+      border-color: var(--color-blue);
+      box-shadow: 0 0 0 4px #050c16, 0 0 0 6px var(--color-blue), 0 0 24px rgba(96, 146, 188, 0.8);
+    }
+
+    /* Tarinavaihe / sisältö */
+    .timeline-stage {
+      margin-top: 2vw;
+      min-height: 160px;
+      position: relative;
+      display: grid;
+      grid-template-areas: "stage";
+    }
+
+    .tl-panel {
+      grid-area: stage;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px);
+      transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.38s ease;
+      pointer-events: none;
+    }
+
+    .tl-panel.is-active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .tl-panel-year {
+      font-family: var(--font-body);
+      font-size: 1.8rem;
+      letter-spacing: 0.12em;
+      color: var(--color-ink-faint);
+      margin-bottom: 0.85rem;
+    }
+
+    .tl-panel--blue .tl-panel-year {
+      color: var(--color-ink-faint);
+      text-shadow: 0 0 20px rgba(96, 146, 188, 0.35);
+    }
+
+    .tl-panel-desc {
+      font-family: var(--font-body);
+      font-size: 1.4rem;
+      font-weight: 300;
+      line-height: 1.55;
+      letter-spacing: 0.02em;
+      color: var(--color-ink);
+      max-width: 960px;
+      text-wrap: pretty;
+    }
+
+    .tl-cta-link {
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .tl-cta-link:hover {
+      border-color: var(--color-blue);
+      color: var(--color-ink);
+      transform: translateX(4px);
+    }
+
+    .tl-arrow {
+      appearance: none;
+      background: none;
+      border: none;
+      width: 3.25rem;
+      height: 3.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -0.75rem;
+      /* nuolen reuna linjaan tekstin kanssa */
+      font-family: var(--font-body);
+      font-size: 2.6rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--color-ink-faint);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+      touch-action: manipulation;
+    }
+
+    .tl-arrow+.tl-arrow {
+      margin-left: 0;
+    }
+
+    .tl-arrow:hover,
+    .tl-arrow:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    .tl-arrow:disabled,
+    .tl-arrow.is-disabled {
+      opacity: 0.15;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tl-label {
+        transition: none;
+      }
+    }
+
+    footer {
+      padding: 2.5rem 0 clamp(1.5rem, 3vh, 2.5rem);
+      max-width: 720px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      line-height: 0;
+    }
+
+    .footer-logo {
+      height: 1.55rem;
+      width: auto;
+      display: block;
+      opacity: 0.65;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .footer-logo-link:hover .footer-logo,
+    .footer-logo-link:focus-visible .footer-logo {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    /* --- ALAOSIOT --- */
+    .block {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(4rem, 12vh, 8rem) clamp(1.5rem, 6vw, 6rem);
+    }
+
+    .block-preview {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(3rem, 8vh, 6rem) clamp(1.5rem, 6vw, 6rem);
+      perspective: 1400px;
+    }
+
+    .preview-frame {
+      position: relative;
+      max-width: 1080px;
+      margin: 0 auto;
+      background: none;
+      border: none;
+      box-shadow: none;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .preview-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
+      border: none;
+      box-shadow: none;
+      border-radius: 12px;
+      transition: box-shadow 0.35s ease;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(2.5rem, 4.5vw, 4rem) clamp(1.5rem, 3.5vw, 3rem);
+      margin-top: clamp(3.5rem, 8vh, 6rem);
+    }
+
+    .feature-item {
+      position: relative;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--color-blue);
+      transition: border-color 0.3s ease;
+    }
+
+    .feature-item:hover {
+      color: var(--color-ink);
+      border-color: var(--color-ink);
+    }
+
+    .feature-num {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      letter-spacing: 0.16em;
+      color: var(--color-blue);
+      margin-bottom: 0.65rem;
+      opacity: 0.85;
+    }
+
+    .feature-title {
+      font-family: var(--font-body);
+      font-weight: 400;
+      font-size: 1.15rem;
+      line-height: 1.35;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-faint);
+      margin-bottom: 0.6rem;
+    }
+
+    .feature-desc {
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--color-ink);
+      opacity: 0.72;
+      letter-spacing: 0.015em;
+    }
+
+    /* Vieritysanimaatio feature gridille */
+    @keyframes feature-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      @supports ((animation-timeline: view()) and (animation-range: entry)) {
+        .feature-item {
+          animation: feature-reveal auto cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation-timeline: view();
+          animation-range: entry 10% entry 42%;
+        }
+      }
+    }
+
+    @supports not ((animation-timeline: view()) and (animation-range: entry)) {
+      .feature-item {
+        opacity: 0;
+        transform: translateY(22px);
+        transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .feature-item.is-revealed {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .feature-item:nth-child(1) {
+        transition-delay: 0.04s;
+      }
+
+      .feature-item:nth-child(2) {
+        transition-delay: 0.11s;
+      }
+
+      .feature-item:nth-child(3) {
+        transition-delay: 0.18s;
+      }
+
+      .feature-item:nth-child(4) {
+        transition-delay: 0.25s;
+      }
+
+      .feature-item:nth-child(5) {
+        transition-delay: 0.32s;
+      }
+
+      .feature-item:nth-child(6) {
+        transition-delay: 0.39s;
+      }
+
+      .feature-item:nth-child(7) {
+        transition-delay: 0.46s;
+      }
+
+      .feature-item:nth-child(8) {
+        transition-delay: 0.53s;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feature-item {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 2.2rem;
+      }
+    }
+
+    .block h2 {
+      font-family: var(--font-body);
+      font-weight: 100;
+      font-size: 2.5rem;
+      letter-spacing: 0.1em;
+      color: var(--color-blue);
+      margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+    }
+
+    .quotes {
+      display: grid;
+      max-width: 900px;
+    }
+
+    .quote {
+      grid-area: 1 / 1;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .quote.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .quote-arrows {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: clamp(1.5rem, 3vh, 2.5rem);
+    }
+
+    .quote blockquote {
+      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+      line-height: 1.5;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      color: var(--color-ink);
+    }
+
+    .quote figcaption {
+      margin-top: 1.2rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.06em;
+      color: var(--color-ink-faint);
+    }
+
+    .contact-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 2rem;
+      margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+
+    .contact-info a,
+    .contact-info span {
+      color: var(--color-ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .contact-info a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1px;
+    }
+
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      width: 100%;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      background: rgba(163, 110, 25, 0.1);
+      border: 0px solid var(--color-ink-faint);
+      border-radius: 0;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      font-size: 1rem;
+      color: var(--color-ink);
+      transition: border-color 0.2s ease;
+    }
+
+    .contact-form textarea {
+      grid-column: 1 / -1;
+      resize: vertical;
+    }
+
+    .contact-form ::placeholder {
+      color: var(--color-ink);
+      opacity: 0.5;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--color-ink);
+    }
+
+    .form-submit {
+      grid-column: 1 / -1;
+      justify-self: start;
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--color-ink-faint);
+      margin-top: 2rem;
+      padding: 0.8rem 1.8rem;
+      font: inherit;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: var(--color-ink);
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-submit:hover,
+    .form-submit:focus-visible {
+      outline: none;
+      border-color: var(--color-ink);
+      background: rgba(247, 233, 224, 0.07);
+    }
+
+    @media (max-width: 640px) {
+      .contact-form {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .quote {
+        transition-duration: 0.5s;
+      }
+    }
+
+    .team-contacts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(2rem, 4vw, 4rem);
+      width: 100%;
+      margin-top: clamp(5rem, 11vh, 8.5rem);
+      padding-top: clamp(2.5rem, 5vh, 4rem);
+      border-top: 1px solid var(--color-ink-faint);
+    }
+
+    .team-person {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .team-person-name {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--color-ink);
+      margin: 0 0 0.15rem 0;
+    }
+
+    .team-person-role {
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-blue);
+      opacity: 0.75;
+      margin: 0 0 0.45rem 0;
+    }
+
+    .team-person-link {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .team-person-link a {
+      color: var(--color-ink);
+      opacity: 0.65;
+      text-decoration: none;
+      transition: opacity 0.2s ease, color 0.2s ease;
+      word-break: break-word;
+    }
+
+    .team-person-link a:hover,
+    .team-person-link a:focus-visible {
+      opacity: 1;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    @media (max-width: 680px) {
+      .team-contacts {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+      }
+    }
+
+    .disclaimer {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--color-ink);
+      letter-spacing: 0.03em;
+      font-weight: 300;
+      opacity: .5;
+      margin: 0;
+    }
+
+    .disclaimer a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: opacity 0.2s ease;
+    }
+
+    .disclaimer a:hover,
+    .disclaimer a:focus-visible {
+      opacity: 1;
+    }
+
+    /* Mobiilinäkymä */
+    @media (max-width: 640px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+      }
+
+      .stage {
+        padding-top: clamp(4.5rem, 11vh, 6.5rem);
+      }
+
+      h1 {
+        font-size: 2.4rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .hero-subhead {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        margin-bottom: 1.5rem;
+      }
+
+      .lead {
+        font-size: 1.25rem;
+        line-height: 1.45;
+        font-weight: 300;
+      }
+
+      .brand-logo {
+        height: 2.3rem;
+      }
+
+      .timeline-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.2rem;
+      }
+
+      .timeline-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .timeline-rail-inner {
+        min-width: 520px;
+        padding: 0 1.5rem;
+      }
+
+      .tl-panel-desc {
+        font-size: 1.2rem;
+        line-height: 1.5;
+      }
+
+      .contact {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      /* Yhteystiedot aina allekkain riippumatta sisällön pituudesta */
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+
+      .contact-info span,
+      .contact-info a {
+        display: block;
+        width: 100%;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Elävä orgaaninen tausta (korostettu) -->
+  <div class="ambient-canvas">
+    <div class="blob blob-amber"></div>
+    <div class="blob blob-terracotta"></div>
+    <div class="blob blob-warm"></div>
+  </div>
+  <div class="paper-grain"></div>
+
+  <header>
+    <a href="#" class="brand" aria-label="SiteHolder">
+      <img src="siteholder-logo-gold.png" alt="SiteHolder" class="brand-logo" width="400" height="133" decoding="async">
+    </a>
+    <nav class="section-nav" aria-label="Sivun osiot">
+      <button type="button" class="nav-arrow" id="navUp" aria-label="Edellinen osio">↑</button>
+      <button type="button" class="nav-arrow" id="navDown" aria-label="Seuraava osio">↓</button>
+    </nav>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="stage-bg-art" aria-hidden="true">
+      <img src="sijainti ja keskustelu.png" alt="" class="stage-art-img" decoding="async">
+    </div>
+    <div class="stage-inner">
+      <main>
+        <h1>Näytä &amp; vuorovaikuta</h1>
+        <p class="hero-subhead">Uuden ajan havainne- ja vuorovaikutusratkaisu hanketoimijoille</p>
+        <p class="lead" id="lead">
+          SiteHolder näyttää hankerakentamisen todelliset maisemavaikutukset mistä tahansa katselupisteestä, suoraan
+          selaimessa. Se tuo kaikki osapuolet samojen näkymien ja yhteisen pöydän ääreen.
+        </p>
+        <a href="#nakyma" class="hero-cta-link" id="heroCta">
+          <span>Tutustu</span>
+          <span class="hero-cta-arrow" aria-hidden="true">→</span>
+        </a>
+      </main>
+    </div>
+  </section>
+
+  <section class="block-preview" id="nakyma" aria-label="SiteHolder-kokonaisuus">
+    <figure class="preview-frame">
+      <img src="siteholder-concept.png" alt="SiteHolder sovellusnäkymä — havainne- ja vuorovaikutustyökalu" width="3703"
+        height="2000" loading="lazy" decoding="async">
+    </figure>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-num">01</span>
+        <h3 class="feature-title">Täysi hallinta</h3>
+        <p class="feature-desc">Sinä päätät koska, mitä, miten ja kenelle esittelet.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">02</span>
+        <h3 class="feature-title">Suoraan selaimessa</h3>
+        <p class="feature-desc">Ei latauksia, laitevaatimuksia tai versionhallintaa.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">03</span>
+        <h3 class="feature-title">Helppoa kaikille</h3>
+        <p class="feature-desc">Helppotajuinen, saavutettava ja mutkaton käyttöliittymä.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">04</span>
+        <h3 class="feature-title">Piirrä tai lataa</h3>
+        <p class="feature-desc">Luo hankealue voimaloineen tai tuo valmiita aineistoja.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">05</span>
+        <h3 class="feature-title">Säädä vapaasti</h3>
+        <p class="feature-desc">Yö vai päivä, voimalan tyyppi, suuntaus, pyörimisnopeus...</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">06</span>
+        <h3 class="feature-title">Data ja raportit</h3>
+        <p class="feature-desc">Kerää vertailukelpoista ja varmistettua tietoa vaivatta.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">07</span>
+        <h3 class="feature-title">Ei määrärajoja</h3>
+        <p class="feature-desc">Lisää uusia projekteja, käyttäjiä ja tiimejä estoitta.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">08</span>
+        <h3 class="feature-title">Varma &amp; huoleton</h3>
+        <p class="feature-desc">Vahva tunnistautuminen, anonymisointi ja vastuu meiltä.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="tekosia" aria-labelledby="tekosia-h">
+    <h2 id="tekosia-h">Näkymiä huomiseen</h2>
+    <div class="quotes">
+      <figure class="quote is-active">
+        <blockquote>Määritä hankealue ja ripottele voimalat kartalle tai tuo valmis .shp-aineisto. Tarkastele
+          kolmiulotteisia tuulivoimaloita mistä tahansa katunäkymästä tai 360-kuvapisteestä.
+        </blockquote>
+        <figcaption>Kaikki osalliset samalla kartalla</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Pyörittele vaihtoehtoisia sijoittelumalleja sisäisesti, esittele rakentamisen maisemavaikutuksia
+          asukasillassa tai anna ihmisten tarkastella näkymiä vapaasti tietyn määräajan.
+        </blockquote>
+        <figcaption>Vapautta raskaista ohjelmistoista</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Tarjoa läpinäkyvyyttä ja parempia vuorovaikuttamisen tapoja vaivattomasti. Kerää karttapohjaista
+          palautetta tai järjestä äänestys sijoitteluvaihtoehtojen välillä.</blockquote>
+        <figcaption>Aito yhteys vie nopeasti eteenpäin</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>SiteHolder näyttää myös tuulivoimaloiden liikkeen ja valot. Miten ne asettuvat kunkin tarkastelijan
+          kannalta tärkeään maisemaan niin päivällä kuin yölläkin.</blockquote>
+        <figcaption>Ei harhakäsityksiä tai avoimia kysymyksiä</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Säästä parhaimmillaan jopa vuosia odottelua, kun kalliit havainnemateriaalit eivät riitäkään
+          tai kun vuorovaikutus maanomistajien tai asukkaiden kanssa takkuaa ja tulehtuu.</blockquote>
+        <figcaption>Selkeyttä ja nopeutta päätöksentekoon</figcaption>
+      </figure>
+      <figure class="quote">
+        <blockquote>Kerrytä laadukasta ja vertailukelpoista dataa kaikista hankkeistasi. Näe selkästi
+          alueelliset erot, toimivat käytännöt ja huomaa kun tie alkaa nousta pystyyn.</blockquote>
+        <figcaption>Johda koko ajan syvenevällä tiedolla</figcaption>
+      </figure>
+    </div>
+    <div class="quote-arrows">
+      <button type="button" class="tl-arrow" id="quotePrev" aria-label="Edellinen sitaatti">←</button>
+      <button type="button" class="tl-arrow" id="quoteNext" aria-label="Seuraava sitaatti">→</button>
+    </div>
+  </section>
+
+  <section class="block block-timeline" id="aikajana" aria-labelledby="aikajana-h">
+
+    <!-- Koko ruudun levyinen, reunoilta pehmeästi häivytetty horisonttiraide -->
+    <div class="timeline-rail-wrap" tabindex="0" role="region" aria-label="Aikajanan virstanpylväät">
+      <div class="timeline-rail-inner">
+        <div class="timeline-line-base"></div>
+        <div class="timeline-line-progress" id="tlProgress"></div>
+        <ol class="timeline-nodes" role="tablist">
+          <li role="presentation">
+            <button type="button" class="tl-node is-active" role="tab" id="tlTab0" aria-selected="true"
+              aria-controls="tlPanel0" data-index="0">
+              <span class="tl-node-tag">2024</span>
+              <span class="tl-node-dot"></span>
+            </button>
+          </li>
+          <li role="presentation">
+            <button type="button" class="tl-node" role="tab" id="tlTab1" aria-selected="false" aria-controls="tlPanel1"
+              data-index="1">
+              <span class="tl-node-tag">2025</span>
+              <span class="tl-node-dot"></span>
+            </button>
+          </li>
+          <li role="presentation">
+            <button type="button" class="tl-node" role="tab" id="tlTab2" aria-selected="false" aria-controls="tlPanel2"
+              data-index="2">
+              <span class="tl-node-tag">2026</span>
+              <span class="tl-node-dot"></span>
+            </button>
+          </li>
+          <li role="presentation">
+            <button type="button" class="tl-node" role="tab" id="tlTab3" aria-selected="false" aria-controls="tlPanel3"
+              data-index="3">
+              <span class="tl-node-tag">2027</span>
+              <span class="tl-node-dot"></span>
+            </button>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Avara tarinavaihe: tekstit eivät kapeudu, vaan asettuvat tyylikkäästi ja tilavasti -->
+    <div class="timeline-stage" aria-live="polite">
+      <article class="tl-panel is-active" id="tlPanel0" role="tabpanel" aria-labelledby="tlTab0" data-index="0">
+        <div class="tl-panel-year">Starttipistooli paukahtaa</div>
+        <p class="tl-panel-desc">Tiresis Oy perustetaan ja se alkaa tuottaa korkeatasoista havainnemateriaalia
+          hanketoimijoiden tarpeisiin. Tuotantojen laatutaso ja tarjonta kehittyvät kilpaa toistensa kanssa ja kaikki
+          lisättyä todellisuutta myöten otetaan käyttöön.</p>
+      </article>
+      <article class="tl-panel" id="tlPanel1" role="tabpanel" aria-labelledby="tlTab1" data-index="1">
+        <div class="tl-panel-year">Tekninen etumatka kasvaa</div>
+        <p class="tl-panel-desc">Tiresis uudistaa havainnetuotannon prosesseja kehittämällä jatkuvasti nopeampia ja
+          monipuolisempia teknisiä ratkaisuita työnkulkuihin ja nousee nopeasti toimikentän
+          kärkipaikoille.</p>
+      </article>
+      <article class="tl-panel" id="tlPanel2" role="tabpanel" aria-labelledby="tlTab2" data-index="2">
+        <div class="tl-panel-year">Tulevaisuus alkaa hahmottua</div>
+        <p class="tl-panel-desc">Toimintakentän kipupisteiden syvenevä ymmärrys antaa uuden haasteen intohimoiselle
+          kehittämiselle. YVA-käytäntöjen ja visuaalisen mallintamisen asiantuntijoiden sekä suomalaisten
+          hanketoimijoiden avulla täysin uusia ratkaisuja aletaan löytää.</p>
+      </article>
+      <article class="tl-panel" id="tlPanel3" role="tabpanel" aria-labelledby="tlTab3" data-index="3">
+        <div class="tl-panel-year">Uusi aika koittaa</div>
+        <p class="tl-panel-desc">SiteHolder julkaistaan. Kalliit viivästykset ja tahmea vuorovaikutus alkavat jäädä
+          historiaan. Täytä lomake jos haluat sijoittaa tulevaisuuden kannalta kriittisen toimintakentän kehitykseen tai
+          saada ensimmäisten joukossa sen hedelmät käyttöösi.</p>
+      </article>
+    </div>
+
+
+    <div class="timeline-controls" aria-label="Aikajanan selaus">
+      <div class="timeline-nav-buttons">
+        <button type="button" class="tl-arrow is-disabled" id="tlPrev" aria-label="Edellinen vaihe" disabled>←</button>
+        <button type="button" class="tl-arrow" id="tlNext" aria-label="Seuraava vaihe">→</button>
+      </div>
+      <span class="timeline-counter" id="tlCounter" aria-live="polite">01 / 04</span>
+    </div>
+
+  </section>
+
+  <section class="block" id="kontakti" aria-labelledby="kontakti-h">
+    <h2 id="kontakti-h">Pysy kuulolla</h2>
+    <p class="contact-info">
+      <span>Kerromme julkaisusta ja kehityksen etenemisestä. Ei roskapostia, vain
+        olennainen.</span>
+    </p>
+    <form class="contact-form" id="contact-form">
+      <input type="text" name="Nimi" placeholder="Nimi" autocomplete="name" aria-label="Nimi" required>
+      <input type="text" name="Yritys" placeholder="Yritys" autocomplete="organization" aria-label="Yritys">
+      <input type="email" name="Sähköposti" placeholder="Sähköposti" autocomplete="email" aria-label="Sähköposti"
+        required>
+      <input type="tel" name="Puhelin" placeholder="Puhelin" autocomplete="tel" aria-label="Puhelin">
+      <textarea name="Rooli" placeholder="Roolisi toimintakentällä" rows="3" aria-label="Rooli" required></textarea>
+      <button type="submit" class="form-submit">Lähetä →</button>
+    </form>
+
+    <div class="team-contacts">
+      <div class="team-person">
+        <h3 class="team-person-name">Patrick Okolo-Kulak</h3>
+        <p class="team-person-role">CEO, asiakkuudet</p>
+        <p class="team-person-link"><a href="mailto:patrick.okolo-kulak@tiresis.fi">patrick.okolo-kulak@tiresis.fi</a></p>
+        <p class="team-person-link"><a href="tel:+358503555003">+358 50 3555 003</a></p>
+      </div>
+      <div class="team-person">
+        <h3 class="team-person-name">Teo Kaipainen</h3>
+        <p class="team-person-role">CTO, teknologia</p>
+        <p class="team-person-link"><a href="mailto:teo.kaipainen@tiresis.fi">teo.kaipainen@tiresis.fi</a></p>
+        <p class="team-person-link"><a href="tel:+358449800499">+358 44 9800 499</a></p>
+      </div>
+      <div class="team-person">
+        <h3 class="team-person-name">Henrik Lindström</h3>
+        <p class="team-person-role">CD, viestintä</p>
+        <p class="team-person-link"><a href="mailto:henrik.lindstrom@tiresis.fi">henrik.lindstrom@tiresis.fi</a></p>
+        <p class="team-person-link"><a href="tel:+358403515553">+358 40 3515 553</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="content-area">
+
+    <footer>
+      <div class="footer-brand">
+        <a href="https://tiresis.fi" target="_blank" rel="noopener noreferrer" class="footer-logo-link" aria-label="Tiresis verkkosivusto">
+          <img src="tiresis-logo-white.svg" alt="Tiresis" class="footer-logo" width="156" height="38" decoding="async">
+        </a>
+        <p class="disclaimer">
+          Tiresis on uuden ajan havainnetoimija. <a href="https://tiresis.fi">tarkemmin →</a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Aikajana: moderni interaktiivinen horisontti-aikajana
+    (function () {
+      const nodes = [...document.querySelectorAll('.tl-node')];
+      const panels = [...document.querySelectorAll('.tl-panel')];
+      const prevBtn = document.getElementById('tlPrev');
+      const nextBtn = document.getElementById('tlNext');
+      const counter = document.getElementById('tlCounter');
+      const progress = document.getElementById('tlProgress');
+      const railWrap = document.querySelector('.timeline-rail-wrap');
+      const n = nodes.length;
+      let current = 0;
+
+      function updateProgress() {
+        if (!progress || nodes.length < 2) return;
+        const first = nodes[0].getBoundingClientRect();
+        const active = nodes[current].getBoundingClientRect();
+        const inner = document.querySelector('.timeline-rail-inner').getBoundingClientRect();
+        const startX = first.left + first.width / 2 - inner.left;
+        const targetX = active.left + active.width / 2 - inner.left;
+        progress.style.left = startX + 'px';
+        progress.style.width = Math.max(0, targetX - startX) + 'px';
+      }
+
+      function goTo(idx) {
+        if (idx < 0) return;
+        if (idx >= n) {
+          document.getElementById('kontakti').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+
+        current = idx;
+        nodes.forEach((node, i) => {
+          node.classList.toggle('is-active', i === current);
+          node.classList.toggle('is-passed', i < current);
+          node.setAttribute('aria-selected', i === current ? 'true' : 'false');
+          node.tabIndex = i === current ? 0 : -1;
+        });
+
+        panels.forEach((panel, i) => {
+          panel.classList.toggle('is-active', i === current);
+        });
+
+        if (counter) {
+          counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
+        }
+
+        if (prevBtn) {
+          prevBtn.classList.toggle('is-disabled', current === 0);
+          prevBtn.disabled = current === 0;
+        }
+
+        if (nextBtn) {
+          nextBtn.setAttribute('aria-label', current === n - 1 ? 'Siirry yhteydenottolomakkeeseen' : 'Seuraava vaihe');
+        }
+
+        updateProgress();
+
+        // Mobiilissa varmistetaan aktiivisen noden näkyvyys
+        if (railWrap && window.innerWidth < 768) {
+          const activeNode = nodes[current];
+          const nodeCenter = activeNode.offsetLeft + activeNode.offsetWidth / 2;
+          railWrap.scrollTo({
+            left: nodeCenter - railWrap.offsetWidth / 2,
+            behavior: 'smooth'
+          });
+        }
+      }
+
+      nodes.forEach((node, idx) => {
+        node.addEventListener('click', () => goTo(idx));
+      });
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (current > 0) goTo(current - 1);
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (current < n - 1) goTo(current + 1);
+          else document.getElementById('kontakti').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+
+      // Nuolinäppäimet näppäimistöllä selattaessa
+      railWrap && railWrap.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); goTo(Math.min(n - 1, current + 1)); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.max(0, current - 1)); }
+      });
+
+      // Kosketuspyyhkäisy (swipe gesture) mobiililaitteille
+      const timelineSec = document.getElementById('aikajana');
+      let touchStartX = 0;
+      let touchStartY = 0;
+      if (timelineSec) {
+        timelineSec.addEventListener('touchstart', (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+          touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        timelineSec.addEventListener('touchend', (e) => {
+          const diffX = e.changedTouches[0].screenX - touchStartX;
+          const diffY = e.changedTouches[0].screenY - touchStartY;
+          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+            if (diffX < 0 && current < n - 1) goTo(current + 1);
+            else if (diffX > 0 && current > 0) goTo(current - 1);
+          }
+        }, { passive: true });
+      }
+
+      window.addEventListener('resize', updateProgress);
+      document.fonts && document.fonts.ready.then(updateProgress);
+      goTo(0);
+    })();
+
+    // Referenssit: välitön siirtymä ilman viivettä
+    (function () {
+      const quotes = [...document.querySelectorAll('.quote')];
+      let current = 0;
+
+      function show(next) {
+        if (next === current) return;
+        quotes[current].classList.remove('is-active');
+        current = next;
+        quotes[current].classList.add('is-active');
+      }
+
+      document.getElementById('quotePrev').addEventListener('click', () => show((current - 1 + quotes.length) % quotes.length));
+      document.getElementById('quoteNext').addEventListener('click', () => show((current + 1) % quotes.length));
+    })();
+
+    // Osionavigaatio: nuolet edelliseen ja seuraavaan osioon
+    (function () {
+      const sections = ['stage', 'nakyma', 'tekosia', 'aikajana', 'kontakti'].map(id => document.getElementById(id));
+      const up = document.getElementById('navUp');
+      const down = document.getElementById('navDown');
+
+      function current() {
+        let idx = 0;
+        sections.forEach((s, i) => { if (s.getBoundingClientRect().top <= window.innerHeight * 0.4) idx = i; });
+        // sivun aivan alalaidassa viimeinen osio on aina nykyinen
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) idx = sections.length - 1;
+        return idx;
+      }
+
+      function goTo(i) {
+        if (i <= 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+        else sections[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function update() {
+        const i = current();
+        up.classList.toggle('is-hidden', i === 0);
+        down.classList.toggle('is-hidden', i === sections.length - 1);
+        up.tabIndex = i === 0 ? -1 : 0;
+        down.tabIndex = i === sections.length - 1 ? -1 : 0;
+      }
+
+      up.addEventListener('click', () => goTo(Math.max(0, current() - 1)));
+      down.addEventListener('click', () => goTo(Math.min(sections.length - 1, current() + 1)));
+      document.getElementById('heroCta')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        goTo(1);
+      });
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+
+    // Yhteydenottolomake: avaa käyttäjän sähköpostiohjelman valmiiksi täytetyllä viestillä
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const body = ['Nimi', 'Yritys', 'Sähköposti', 'Puhelin'].map(k => k + ': ' + (f.get(k) || '')).join('\n')
+        + '\n\n' + f.get('Asia');
+      location.href = 'mailto:imago@laaki.fi?subject=' + encodeURIComponent('Yhteydenotto Laakin sivuilta')
+        + '&body=' + encodeURIComponent(body);
+    });
+
+    // Feature gridin vieritysanimaation tuki selaimille ilman natiivia view-timelinea
+    if (!CSS.supports('(animation-timeline: view()) and (animation-range: entry)')) {
+      const featureObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-revealed');
+              featureObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+      );
+      document.querySelectorAll('.feature-item').forEach((el) => featureObserver.observe(el));
+    }
+
+    // Hero: syvä parallaksi ja voimakas vastapäivään kierto (vieritys- ja hiiriparallaksi)
+    (function () {
+      const stage = document.getElementById('stage');
+      const artWrap = document.querySelector('.stage-bg-art');
+      const artImg = document.querySelector('.stage-art-img');
+      if (!stage || !artWrap) return;
+
+      // 1. Vierityksen parallaksi- ja kääntö-fallback selaimille ilman CSS view-timelinea
+      if (!CSS.supports('(animation-timeline: view()) and (animation-range: entry)')) {
+        let ticking = false;
+        function onScroll() {
+          const scrollY = window.scrollY;
+          const stageHeight = stage.offsetHeight || window.innerHeight;
+          if (scrollY <= stageHeight * 1.5) {
+            const progress = Math.min(1, Math.max(0, scrollY / stageHeight));
+            const translateY = progress * 150;
+            const rotate = progress * -75;
+            const opacity = Math.max(0, 1 - progress * 1.25);
+            artWrap.style.transform = `translate3d(0, ${translateY}px, 0) rotate(${rotate}deg)`;
+            artWrap.style.opacity = opacity;
+          }
+          ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+          if (!ticking) {
+            requestAnimationFrame(onScroll);
+            ticking = true;
+          }
+        }, { passive: true });
+        onScroll();
+      }
+
+    })();
+
+    // Sovelluskuvitus: hento ja hillitty 3D-kääntelyefekti hiiren sijainnin mukaan
+    (function () {
+      const section = document.getElementById('nakyma');
+      const frame = section ? section.querySelector('.preview-frame') : null;
+      if (!section || !frame) return;
+
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      let rafId = null;
+      let targetRotX = 0;
+      let targetRotY = 0;
+      let curRotX = 0;
+      let curRotY = 0;
+      let isHovering = false;
+
+      function render() {
+        // Rauhallinen ja pehmeä interpolointi (lerp) takaa silkinsileän liikkeen
+        curRotX += (targetRotX - curRotX) * 0.07;
+        curRotY += (targetRotY - curRotY) * 0.07;
+
+        frame.style.transform = `perspective(1200px) rotateX(${curRotX.toFixed(2)}deg) rotateY(${curRotY.toFixed(2)}deg)`;
+
+        if (isHovering || Math.abs(targetRotX - curRotX) > 0.02 || Math.abs(targetRotY - curRotY) > 0.02) {
+          rafId = requestAnimationFrame(render);
+        } else {
+          frame.style.transform = '';
+          rafId = null;
+        }
+      }
+
+      function onMouseMove(e) {
+        const rect = frame.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // Suhteellinen sijainti [-1, 1] kuvan keskipisteestä
+        const normX = Math.max(-1.15, Math.min(1.15, (e.clientX - centerX) / (rect.width / 2)));
+        const normY = Math.max(-1.15, Math.min(1.15, (e.clientY - centerY) / (rect.height / 2)));
+
+        // Hento ja lievennetty kallistuskulma (max n. ±2.8°)
+        targetRotY = normX * 2.8;
+        targetRotX = -normY * 2.8;
+        isHovering = true;
+
+        if (!rafId) {
+          rafId = requestAnimationFrame(render);
+        }
+      }
+
+      function onMouseLeave() {
+        isHovering = false;
+        targetRotX = 0;
+        targetRotY = 0;
+        if (!rafId) {
+          rafId = requestAnimationFrame(render);
+        }
+      }
+
+      section.addEventListener('mousemove', onMouseMove, { passive: true });
+      section.addEventListener('mouseleave', onMouseLeave);
+    })();
+  </script>
+</body>
+
+</html>
